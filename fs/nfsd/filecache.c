@@ -1,7 +1,6 @@
+// SPDX-License-Identifier: GPL-2.0
 /*
- * Open file cache.
- *
- * (c) 2015 - Jeff Layton <jeff.layton@primarydata.com>
+ * The NFSD open file cache.
  */
 
 #include <linux/hash.h>
