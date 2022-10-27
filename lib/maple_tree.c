@@ -1209,7 +1209,6 @@ done:
 static inline void mas_alloc_nodes(struct ma_state *mas, gfp_t gfp)
 {
 	struct maple_alloc *node;
-	struct maple_alloc **nodep = &mas->alloc;
 	unsigned long allocated = mas_allocated(mas);
 	unsigned long success = allocated;
 	unsigned int requested = mas_alloc_req(mas);
@@ -1263,8 +1262,7 @@ static inline void mas_alloc_nodes(struct ma_state *mas, gfp_t gfp)
 			node->node_count--;
 
 		success += count;
-		nodep = &node->slot[0];
-		node = *nodep;
+		node = node->slot[0];
 		requested -= count;
 	}
 	mas->alloc->total = success;
@@ -2903,8 +2901,8 @@ static inline void *mtree_range_walk(struct ma_state *mas)
 	unsigned long max, min;
 	unsigned long prev_max, prev_min;
 
-	last = next = mas->node;
-	prev_min = min = mas->min;
+	next = mas->node;
+	min = mas->min;
 	max = mas->max;
 	do {
 		offset = 0;
@@ -4970,8 +4968,9 @@ static inline bool mas_anode_descend(struct ma_state *mas, unsigned long size)
 {
 	enum maple_type type = mte_node_type(mas->node);
 	unsigned long pivot, min, gap = 0;
-	unsigned char count, offset;
-	unsigned long *gaps = NULL, *pivots = ma_pivots(mas_mn(mas), type);
+	unsigned char offset;
+	unsigned long *gaps;
+	unsigned long *pivots = ma_pivots(mas_mn(mas), type);
 	void __rcu **slots = ma_slots(mas_mn(mas), type);
 	bool found = false;
 
@@ -4982,9 +4981,8 @@ static inline bool mas_anode_descend(struct ma_state *mas, unsigned long size)
 
 	gaps = ma_gaps(mte_to_node(mas->node), type);
 	offset = mas->offset;
-	count = mt_slots[type];
 	min = mas_safe_min(mas, pivots, offset);
-	for (; offset < count; offset++) {
+	for (; offset < mt_slots[type]; offset++) {
 		pivot = mas_safe_pivot(mas, pivots, offset, type);
 		if (offset && !pivot)
 			break;
@@ -5010,8 +5008,6 @@ static inline bool mas_anode_descend(struct ma_state *mas, unsigned long size)
 				mas->min = min;
 				mas->max = pivot;
 				offset = 0;
-				type = mte_node_type(mas->node);
-				count = mt_slots[type];
 				break;
 			}
 		}
