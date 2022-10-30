@@ -847,7 +847,7 @@ static const struct resource_caps res_cap_dcn314 = {
 	.num_ddc = 5,
 	.num_vmid = 16,
 	.num_mpc_3dlut = 2,
-	.num_dsc = 3,
+	.num_dsc = 4,
 };
 
 static const struct dc_plane_cap plane_cap = {
@@ -937,6 +937,10 @@ static const struct dc_debug_options debug_defaults_diags = {
 };
 
 static const struct dc_panel_config panel_config_defaults = {
+	.psr = {
+		.disable_psr = false,
+		.disallow_psrsu = false,
+	},
 	.ilr = {
 		.optimize_edp_link_rate = true,
 	},
